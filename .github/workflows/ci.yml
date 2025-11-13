@@ -26,21 +26,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Step 4: Set PYTHONPATH
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$GITHUB_WORKSPACE/src:$GITHUB_WORKSPACE" >> $GITHUB_ENV
-
-      # Step 5: Run tests
+      # Step 4: Run tests with PYTHONPATH
       - name: Run pytest
         id: pytest
-        run: pytest tests/
-      
-      # Step 6: Build Docker only if tests passed
+        run: |
+          export PYTHONPATH=$GITHUB_WORKSPACE/src:$GITHUB_WORKSPACE
+          pytest tests/
+
+      # Step 5: Build Docker only if tests passed
       - name: Build Docker Image
         if: success()   # Only runs if previous step succeeded
         run: docker build -t flask-devops:latest -f docker/Dockerfile .
 
-      # Step 7: Log in to GitHub Container Registry
+      # Step 6: Log in to GitHub Container Registry
       - name: Log in to GHCR
         if: success()   # Only runs if previous steps succeeded
         uses: docker/login-action@v2
@@ -49,7 +47,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 8: Tag and push Docker image
+      # Step 7: Tag and push Docker image
       - name: Push Docker Image
         if: success()   # Only runs if previous steps succeeded
         run: |
