@@ -1,5 +1,6 @@
-import requests
+from app import app
 
 def test_home():
-    response = requests.get("http://localhost:5000")
-    assert response.status_code == 200
+    with app.test_client() as client:
+        response = client.get('/')
+        assert response.status_code == 200
